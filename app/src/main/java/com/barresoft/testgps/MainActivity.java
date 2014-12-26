@@ -1,19 +1,39 @@
 package com.barresoft.testgps;
 
+import android.content.Context;
+import android.hardware.Camera;
+import android.hardware.Camera.Parameters;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.SeekBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements LocationListener {
+
+    private boolean led=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        iniciarGPS();
     }
 
+    private void iniciarGPS(){
+        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        lm.requestLocationUpdates( LocationManager.GPS_PROVIDER,
+                1000,   // 1 segundo
+                10, this);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -35,5 +55,81 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        double speed = location.getSpeed(); //m/s
+        speed=speed*3.6; //km/h
+        SeekBar sbarVelocidad = (SeekBar)findViewById(R.id.sbarVelocidad);
+        int speedMax = sbarVelocidad.getMax();
+
+        TextView txtVelocidad = (TextView)findViewById(R.id.txtVelocidad);
+        txtVelocidad.setText((int) speed);
+
+        if (speed > speedMax){
+            sbarVelocidad.setMax((int) speed);
+        }
+        sbarVelocidad.setProgress((int) speed);
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
+
+    private void LED(){ //SWITCH
+        Camera camera = Camera.open();
+        Parameters p = camera.getParameters();
+        if (led==false) {
+            led=true;
+            p.setFlashMode(Parameters.FLASH_MODE_TORCH);
+            camera.setParameters(p);
+            camera.startPreview();
+        }else{
+            led=false;
+            p.setFlashMode(Parameters.FLASH_MODE_OFF);
+            camera.setParameters(p);
+            camera.stopPreview();
+            camera.release();
+            camera = null;
+        }
+    }
+
+    private void LED(Boolean bool){
+        Camera camera = Camera.open();
+        Parameters p = camera.getParameters();
+        if (bool){
+            led=true;
+            p.setFlashMode(Parameters.FLASH_MODE_TORCH);
+            camera.setParameters(p);
+            camera.startPreview();
+        }else{
+            led=false;
+            p.setFlashMode(Parameters.FLASH_MODE_OFF);
+            camera.setParameters(p);
+            camera.stopPreview();
+            camera.release();
+            camera = null;
+        }
+    }
+
+    private void msg(String msg){
+        Toast.makeText(getBaseContext(),msg,Toast.LENGTH_LONG).show();
+    }
+
+    public void ledSwitch(View view){
+        LED();
+        msg("led?");
     }
 }
