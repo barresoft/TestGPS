@@ -30,6 +30,15 @@
         android:layout_alignParentEnd="true"
         android:max="0"
         android:progress="0"
-        android:onClick="ledSwitch"
-        android:nestedScrollingEnabled="true" />
+        android:nestedScrollingEnabled="true"
+        android:clickable="false" />
+
+    <Chronometer
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/cronometro"
+        android:layout_below="@+id/sbarVelocidad"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="66dp" />
+
 </RelativeLayout>
